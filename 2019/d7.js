@@ -1,4 +1,4 @@
-let assert = require('assert')
+const assert = require('assert')
 const fs = require('fs')
 
 // DECRYPT OPCODE
@@ -26,9 +26,13 @@ read_opcode = (opcode) => {
 function process_arr (arr, input){
     let i = 0
     let output = Array()
+    
     while (i< arr.length){
+        
         opcode = read_opcode(arr[i])
-
+        console.log(arr.join("."))
+        console.log(opcode)
+        console.log(input)
         switch (opcode.operator){
             case 1:
                 operator_1 = opcode.p1 === 1 ? arr[i+1] : arr[arr[i+1]]
@@ -47,7 +51,8 @@ function process_arr (arr, input){
                 break;
             
             case 3:
-                arr[arr[i+1]] = input
+                arr[arr[i+1]] = input[0]
+                input = input.slice(1)
                 i += 2
                 break;
 
@@ -85,25 +90,111 @@ function process_arr (arr, input){
                 break;
 
             case 99:
+                console.log("Halt!")
+                cont = false
+                console.log(output)
                 return output
 
             default:
                 throw opcode.operator + " not in opcodes"
+                // return [-1000]
     }
 
   }
+  console.log("Continue")
+  return output
 }
 
 // data = Buffer.from(fs.readFileSync('d5.txt')).toString().split(",").map(val => parseInt(val))
 // console.log(process_arr(data.slice(0), 1))
 // console.log(process_arr(data.slice(0), 5))
 
-data = [3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0]
-phases = [4, 3, 2, 1, 0]
 
-run_amplifiers(data, phases) => {
-    phases.forEach(phase){
-        output = process_arr(data.slice(0), phase).pop()
+
+run_amplifiers = (data, phases) => {
+    let input = 0
+    for (const phase of phases) {
+        input = process_arr(data.slice(0), [phase, input]).pop()
     }
-    console.log(output)
+    return input
 }
+
+build_permutation = arr =>{
+    // factorial = n => {return n === 0 ? 1 : n * factorial(n - 1)}
+    
+    perm = (head, tail) => {
+        if (head.length === 0){
+            results.push(tail)
+        } else {
+            for (let i =0; i < head.length; i++){
+                h = head.slice(0)
+                t = tail.slice(0)
+                elem = h.splice(i, 1)[0]
+                t.push(elem)
+                perm(h, t)
+            }
+        }
+    }
+
+    var results = []
+    perm(arr, [])
+    return results
+}
+var cont = false
+run_amplifiers_feedback = (data, phases) => {
+    let input = 0
+    let idx = 0
+    cont = true
+    console.log(data)
+    console.log(phases)
+    while(cont){
+        console.log(phases[idx])
+        console.log(input)
+        input = process_arr(data.slice(0), [phases[idx], input]).pop()
+        idx = idx < 5 ? idx + 1 : 0
+    }
+    console.log(input)
+    return input
+}
+
+// part 1
+
+// data = [3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0]
+// phases = [4, 3, 2, 1, 0]
+// output = 43210
+// assert.equal(run_amplifiers(data, phases), output)
+
+// data = [3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0]
+// phases = [0,1,2,3,4]
+// output = 54321
+// assert.equal(run_amplifiers(data, phases), output)
+
+// data = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0]
+// phases= [1,0,4,3,2]
+// output = 65210
+// assert.equal(run_amplifiers(data, phases), output)
+
+
+
+// data = Buffer.from(fs.readFileSync('d7.txt')).toString().split(",").map(val => parseInt(val))
+// phases = build_permutation([0, 1, 2, 3, 4])
+// outputs = phases.map(val => run_amplifiers(data, val))
+// max_idx = outputs.indexOf(Math.max(...outputs))
+// console.log(phases[max_idx], outputs[max_idx])
+
+// part 2
+data = [3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5]
+phases = [9, 8, 7, 6, 5]
+output = 139629729
+assert.equal(run_amplifiers_feedback(data, phases), output)
+
+// data = [3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10]
+// phases = [9, 7, 8, 5, 6]
+// output = 18216
+// assert.equal(run_amplifiers_feedback(data, phases), output)
+
+// data = Buffer.from(fs.readFileSync('d7.txt')).toString().split(",").map(val => parseInt(val))
+// phases = build_permutation([5, 6, 7, 8, 9])
+//     outputs = phases.map(val => run_amplifiers(data, val))
+// max_idx = outputs.indexOf(Math.max(...outputs))
+// console.log(phases[max_idx], outputs[max_idx])
