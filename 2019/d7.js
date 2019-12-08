@@ -94,6 +94,16 @@ function process_arr (arr, input){
   }
 }
 
-data = Buffer.from(fs.readFileSync('d5.txt')).toString().split(",").map(val => parseInt(val))
-console.log(process_arr(data.slice(0), 1))
-console.log(process_arr(data.slice(0), 5))
+// data = Buffer.from(fs.readFileSync('d5.txt')).toString().split(",").map(val => parseInt(val))
+// console.log(process_arr(data.slice(0), 1))
+// console.log(process_arr(data.slice(0), 5))
+
+data = [3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0]
+phases = [4, 3, 2, 1, 0]
+
+run_amplifiers(data, phases) => {
+    phases.forEach(phase){
+        output = process_arr(data.slice(0), phase).pop()
+    }
+    console.log(output)
+}
