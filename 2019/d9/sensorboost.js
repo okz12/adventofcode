@@ -20,7 +20,8 @@ if (!module.parent) {
     data = Buffer.from(fs.readFileSync('d9.txt')).toString().split(",").map(val => parseInt(val))
 
     // part 1
-    console.log(sensorboost(data, [2]))
+    console.log(sensorboost(data, [1]))
 
     // part 2
+    console.log(sensorboost(data, [2]))
   }
