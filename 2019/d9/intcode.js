@@ -8,24 +8,37 @@ let OPCODE = {
     JUMP_IF_FALSE: 6,
     LESS_THAN : 7,
     EQUALS : 8,
+    ADJUST_RELATIVE_BASE: 9,
     END_PROGRAM : 99
 }
 
 class IntCode {
-    constructor(instructions, phases){
+    constructor(instructions, inputs){
+        this.memory = {}
+        for (let i =0; i < instructions.length; i++){
+            this.memory[i] = instructions[i]
+        }
+
         this.memory = instructions
-        this.inputs = phases
+        this.inputs = inputs
         this.pointer = 0
         this.terminated = false
+        this.relative_base = 0
     }
 
     getParameter (parameterMode, position){
-        return parameterMode === 0 ? this.memory[this.memory[position]] : this.memory[position]
+        switch (parameterMode){
+            case 0:
+                return this.memory[this.memory[position]]
+            case 1:
+                return this.memory[position]
+            case 2:
+                return this.memory[this.memory[position] + this.relative_base]
+        }
     }
 
-    run (input) {
+    run () {
         let {memory, inputs} = this
-        inputs.push(input)
         let output = null
         while(!this.terminated){
             let instruction = memory[this.pointer].toString().padStart(5, '0')
@@ -33,20 +46,20 @@ class IntCode {
             let {parameter1, parameter2, parameter3} = [null, null, null]
 
             // fetch relevant parameters by opcode
-            if ([1, 2, 3, 4, 5, 6, 7, 8].includes(opcode)){
+            if ([1, 2, 4, 5, 6, 7, 8, 9].includes(opcode)){
                 parameter1 = this.getParameter(Number(instruction[2]), this.pointer+1)
             }
             if (opcode===3){
-                parameter1 = memory[this.pointer+1]
+                parameter1 = Number(instruction[2]) === 2 ? memory[this.pointer+1] + this.relative_base : memory[this.pointer+1]
             }
-            if ([1, 2, 5, 6, 7, 8].includes(opcode)){
+            if ([1, 2, 5, 6, 7, 8, 9].includes(opcode)){
                 parameter2 = this.getParameter(Number(instruction[1]), this.pointer+2)
             }
-            if ([1, 2, 7, 8].includes(opcode)){
-                parameter3 = memory[this.pointer+3]
+            if ([1, 2, 7, 8, 9].includes(opcode)){
+                parameter3 = Number(instruction[0]) === 2 ? memory[this.pointer+3] + this.relative_base : memory[this.pointer+3]
             }
 
-            // console.log(this.pointer, this.inputs, memory.join(', '), opcode, parameter1, parameter2, parameter3)
+            // console.log(this.pointer, this.inputs, this.relative_base, instruction, opcode, parameter1, parameter2, parameter3)
 
             switch(opcode){
                 case OPCODE.ADD:
@@ -92,10 +105,14 @@ class IntCode {
                     memory[parameter3] = parameter1 === parameter2 ? 1 : 0
                     this.pointer += 4
                     break;
+
+                case OPCODE.ADJUST_RELATIVE_BASE:
+                    this.relative_base += parameter1
+                    this.pointer += 2
+                    break;
     
                 case OPCODE.END_PROGRAM:
                     this.terminated = true
-                    return inputs[0]
                     break;
 
                 default:

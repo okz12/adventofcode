@@ -1,7 +1,7 @@
 const assert = require('assert');
-const intcode = require('./intcode');
-let run_amplifiers = intcode.run_amplifiers
-let run_amplifiers_feedback = intcode.run_amplifiers_feedback
+const amplifiers = require('./amplifiers');
+let run_amplifiers = amplifiers.run_amplifiers
+let run_amplifiers_feedback = amplifiers.run_amplifiers_feedback
 
 
 describe('Day 7', () => {
@@ -39,15 +39,7 @@ describe('Day 7', () => {
     it('Run Amplifiers Feedback Sample 2', () => {
         data = [3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10]
         phases = [9, 7, 8, 5, 6]
-        output = 1821
+        output = 18216
         assert.equal(run_amplifiers_feedback(data, phases), output)
     });
 })
-
-// part 2
-
-// data = Buffer.from(fs.readFileSync('d7.txt')).toString().split(",").map(val => parseInt(val))
-// phases = build_permutation([5, 6, 7, 8, 9])
-//     outputs = phases.map(val => run_amplifiers(data, val))
-// max_idx = outputs.indexOf(Math.max(...outputs))
-// console.log(phases[max_idx], outputs[max_idx])
