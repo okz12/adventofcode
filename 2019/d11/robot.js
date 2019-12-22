@@ -13,9 +13,7 @@ navigate = (instructions, floor) => {
     let painted = new Set()
     let robot = {pos: {x: 0,y: 0},
         vel: {x: 0,y: 1}}
-    let output = 0
     let new_color = 0
-    let paint = 0
 
     let a = 0
     while ((!(typeof new_color === "undefined")) && a<1e5 ){
