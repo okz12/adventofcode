@@ -38,15 +38,16 @@ class IntCode {
     }
 
     run (input) {
-        let {memory, inputs} = this
         let output = null
         if (!(typeof(input) === "undefined")){
-            inputs.push(input)
+            // console.log(typeof(input))
+            this.inputs.push(input)
+            // console.log(inputs)
         }
         let a = 0;
-        while(!this.terminated && a<1000){
+        while(!this.terminated ){
             a++
-            let instruction = memory[this.pointer].toString().padStart(5, '0')
+            let instruction = this.memory[this.pointer].toString().padStart(5, '0')
             let opcode = Number(instruction.slice(3,5))
             let {parameter1, parameter2, parameter3} = [null, null, null]
 
@@ -55,38 +56,38 @@ class IntCode {
                 parameter1 = this.getParameter(Number(instruction[2]), this.pointer+1)
             }
             if (opcode===3){
-                parameter1 = Number(instruction[2]) === 2 ? memory[this.pointer+1] + this.relative_base : memory[this.pointer+1]
+                parameter1 = Number(instruction[2]) === 2 ? this.memory[this.pointer+1] + this.relative_base : this.memory[this.pointer+1]
             }
             if ([1, 2, 5, 6, 7, 8, 9].includes(opcode)){
                 parameter2 = this.getParameter(Number(instruction[1]), this.pointer+2)
             }
             if ([1, 2, 7, 8, 9].includes(opcode)){
-                parameter3 = Number(instruction[0]) === 2 ? memory[this.pointer+3] + this.relative_base : memory[this.pointer+3]
+                parameter3 = Number(instruction[0]) === 2 ? this.memory[this.pointer+3] + this.relative_base : this.memory[this.pointer+3]
             }
 
             // console.log(this.pointer, this.inputs, this.relative_base, instruction, opcode, parameter1, parameter2, parameter3)
 
             switch(opcode){
                 case OPCODE.ADD:
-                    memory[parameter3] = parameter1 + parameter2
+                    this.memory[parameter3] = parameter1 + parameter2
                     this.pointer += 4
                     break;
                     
                 case OPCODE.MULTIPLY:
-                    memory[parameter3] = parameter1 * parameter2
+                    this.memory[parameter3] = parameter1 * parameter2
                     this.pointer += 4
                     break;
 
                 case OPCODE.STORE_INPUT:
-                    memory[parameter1] = inputs.shift()
+                    this.memory[parameter1] = this.inputs.shift()
                     this.pointer += 2
                     break;
     
                 case OPCODE.SEND_TO_OUTPUT: 
                     output = parameter1
                     this.pointer += 2
+                    this.inputs = []
                     return output
-                    break;
     
                 case OPCODE.JUMP_IF_TRUE:
                     this.pointer = parameter1 != 0 ? parameter2 : this.pointer + 3
@@ -97,17 +98,17 @@ class IntCode {
                     break;
     
                 case OPCODE.LESS_THAN:
-                    memory[parameter3] = parameter1 < parameter2 ? 1 : 0
+                    this.memory[parameter3] = parameter1 < parameter2 ? 1 : 0
                     this.pointer += 4
                     break;
     
                 case OPCODE.GREATER_THAN:
-                    memory[parameter3] = parameter1 > parameter2 ? 1 : 0
+                    this.memory[parameter3] = parameter1 > parameter2 ? 1 : 0
                     this.pointer += 4
                     break;
 
                 case OPCODE.EQUALS:
-                    memory[parameter3] = parameter1 === parameter2 ? 1 : 0
+                    this.memory[parameter3] = parameter1 === parameter2 ? 1 : 0
                     this.pointer += 4
                     break;
 

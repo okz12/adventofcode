@@ -21,7 +21,7 @@ navigate = (instructions, floor) => {
         // console.log(floor, robot.pos, pts(robot.pos), floor.has(pts(robot.pos)))
         let color = (pts(robot.pos) in floor) ? floor[(pts(robot.pos))] : 0
         new_color = intcode.run(color)
-        let turn_right = intcode.run(-1)
+        let turn_right = intcode.run()
         if (!(typeof new_color === "undefined")){
             floor[(pts(robot.pos))] = new_color
             painted.add(pts(robot.pos))
