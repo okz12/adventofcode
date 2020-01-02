@@ -44,9 +44,7 @@ class IntCode {
             this.inputs.push(input)
             // console.log(inputs)
         }
-        let a = 0;
         while(!this.terminated ){
-            a++
             let instruction = this.memory[this.pointer].toString().padStart(5, '0')
             let opcode = Number(instruction.slice(3,5))
             let {parameter1, parameter2, parameter3} = [null, null, null]
@@ -86,7 +84,7 @@ class IntCode {
                 case OPCODE.SEND_TO_OUTPUT: 
                     output = parameter1
                     this.pointer += 2
-                    this.inputs = []
+                    // this.inputs = []
                     return output
     
                 case OPCODE.JUMP_IF_TRUE:
